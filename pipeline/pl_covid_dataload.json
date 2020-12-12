@@ -1,0 +1,305 @@
+{
+	"name": "pl_covid_dataload",
+	"properties": {
+		"activities": [
+			{
+				"name": "cp_covid_raw_stgsql",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"preCopyScript": "TRUNCATE TABLE dbo.rawcoviddata",
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "submission_date",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "submission_date",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "state",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "state",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "tot_cases",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "tot_cases",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "conf_cases",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "conf_cases",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "prob_cases",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "prob_cases",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "new_case",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "new_case",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "pnew_case",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "pnew_case",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "tot_death",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "tot_death",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "conf_death",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "conf_death",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "prob_death",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "prob_death",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "new_death",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "new_death",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "pnew_death",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "pnew_death",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "created_at",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "created_at",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "consent_cases",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "consent_cases",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "consent_deaths",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "consent_deaths",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							}
+						],
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "ds_covid_src_rawdata_adls",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "ds_covid_dest_rawdata_asql",
+						"type": "DatasetReference"
+					}
+				]
+			},
+			{
+				"name": "dataflow1",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [
+					{
+						"activity": "lkp_covid_minmax_rawdata",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "df_covid_dataload",
+						"type": "DataFlowReference"
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
+			},
+			{
+				"name": "lkp_covid_minmax_rawdata",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "cp_covid_raw_stgsql",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": "SELECT ISNULL(MIN(submission_date),'2000-01-01') MinDate, ISNULL(MAX(submission_date),'2100-12-31') MaxDate FROM RawCovidData",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "ds_covid_dest_rawdata_asql",
+						"type": "DatasetReference"
+					}
+				}
+			}
+		],
+		"annotations": []
+	}
+}

@@ -1,0 +1,85 @@
+{
+	"name": "ds_covid_src_rawdata_adls",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_adlsg2",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "United_States_COVID-19_Cases_and_Deaths_by_State_over_Time.csv",
+				"folderPath": "input/coviddata",
+				"fileSystem": "storage"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "submission_date",
+				"type": "String"
+			},
+			{
+				"name": "state",
+				"type": "String"
+			},
+			{
+				"name": "tot_cases",
+				"type": "String"
+			},
+			{
+				"name": "conf_cases",
+				"type": "String"
+			},
+			{
+				"name": "prob_cases",
+				"type": "String"
+			},
+			{
+				"name": "new_case",
+				"type": "String"
+			},
+			{
+				"name": "pnew_case",
+				"type": "String"
+			},
+			{
+				"name": "tot_death",
+				"type": "String"
+			},
+			{
+				"name": "conf_death",
+				"type": "String"
+			},
+			{
+				"name": "prob_death",
+				"type": "String"
+			},
+			{
+				"name": "new_death",
+				"type": "String"
+			},
+			{
+				"name": "pnew_death",
+				"type": "String"
+			},
+			{
+				"name": "created_at",
+				"type": "String"
+			},
+			{
+				"name": "consent_cases",
+				"type": "String"
+			},
+			{
+				"name": "consent_deaths",
+				"type": "String"
+			}
+		]
+	}
+}

@@ -1,0 +1,77 @@
+{
+	"name": "ds_covid_dest_rawdata_asql",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_azuresql",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "submission_date",
+				"type": "varchar"
+			},
+			{
+				"name": "state",
+				"type": "varchar"
+			},
+			{
+				"name": "tot_cases",
+				"type": "varchar"
+			},
+			{
+				"name": "conf_cases",
+				"type": "varchar"
+			},
+			{
+				"name": "prob_cases",
+				"type": "varchar"
+			},
+			{
+				"name": "new_case",
+				"type": "varchar"
+			},
+			{
+				"name": "pnew_case",
+				"type": "varchar"
+			},
+			{
+				"name": "tot_death",
+				"type": "varchar"
+			},
+			{
+				"name": "conf_death",
+				"type": "varchar"
+			},
+			{
+				"name": "prob_death",
+				"type": "varchar"
+			},
+			{
+				"name": "new_death",
+				"type": "varchar"
+			},
+			{
+				"name": "pnew_death",
+				"type": "varchar"
+			},
+			{
+				"name": "created_at",
+				"type": "varchar"
+			},
+			{
+				"name": "consent_cases",
+				"type": "varchar"
+			},
+			{
+				"name": "consent_deaths",
+				"type": "varchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "RawCovidDate"
+		}
+	}
+}

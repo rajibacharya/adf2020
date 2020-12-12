@@ -1,0 +1,66 @@
+{
+	"name": "ds_covid_src_dimcalendar_asql",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_azuresql",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "DateKey",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "Date",
+				"type": "date"
+			},
+			{
+				"name": "DayDate",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "DayOfWeekName",
+				"type": "nvarchar"
+			},
+			{
+				"name": "WeekNumber",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "MonthNumber",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "MonthName",
+				"type": "nvarchar"
+			},
+			{
+				"name": "MonthShortName",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Year",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "QuarterNumber",
+				"type": "nvarchar"
+			},
+			{
+				"name": "QuarterName",
+				"type": "nvarchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "DimCalendar"
+		}
+	}
+}

@@ -1,0 +1,52 @@
+{
+	"name": "ds_covid_factcoviddata",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_azuresql",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "CovidDataKey",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "DateKey",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "StateKey",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "ConformedNewCases",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "ProbableNewCases",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "ConformedNewDeath",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "ProbableNewDeath",
+				"type": "int",
+				"precision": 10
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "FactCovidData"
+		}
+	}
+}

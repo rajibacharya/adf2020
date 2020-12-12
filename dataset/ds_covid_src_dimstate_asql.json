@@ -1,0 +1,30 @@
+{
+	"name": "ds_covid_src_dimstate_asql",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_azuresql",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "StateKey",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "StateCode",
+				"type": "nchar"
+			},
+			{
+				"name": "StateName",
+				"type": "nvarchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "DimState"
+		}
+	}
+}
