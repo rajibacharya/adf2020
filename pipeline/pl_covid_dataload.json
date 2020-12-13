@@ -241,7 +241,7 @@
 				"type": "ExecuteDataFlow",
 				"dependsOn": [
 					{
-						"activity": "lkp_covid_minmax_rawdata",
+						"activity": "cp_covid_raw_stgsql",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -265,38 +265,6 @@
 						"computeType": "General"
 					},
 					"traceLevel": "Fine"
-				}
-			},
-			{
-				"name": "lkp_covid_minmax_rawdata",
-				"type": "Lookup",
-				"dependsOn": [
-					{
-						"activity": "cp_covid_raw_stgsql",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"timeout": "7.00:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"source": {
-						"type": "AzureSqlSource",
-						"sqlReaderQuery": "SELECT ISNULL(MIN(submission_date),'2000-01-01') MinDate, ISNULL(MAX(submission_date),'2100-12-31') MaxDate FROM RawCovidData",
-						"queryTimeout": "02:00:00",
-						"partitionOption": "None"
-					},
-					"dataset": {
-						"referenceName": "ds_covid_dest_rawdata_asql",
-						"type": "DatasetReference"
-					}
 				}
 			}
 		],

@@ -10,9 +10,8 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
-				"fileName": "United_States_COVID-19_Cases_and_Deaths_by_State_over_Time.csv",
-				"folderPath": "input/coviddata",
-				"fileSystem": "storage"
+				"fileName": "CovidUpdate.csv",
+				"fileSystem": "covid"
 			},
 			"columnDelimiter": ",",
 			"escapeChar": "\\",
