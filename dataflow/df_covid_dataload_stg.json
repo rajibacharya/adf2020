@@ -1,0 +1,61 @@
+{
+	"name": "df_covid_dataload_stg",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ds_covid_dest_rawdata_asql",
+						"type": "DatasetReference"
+					},
+					"name": "SrcRawCoviDataAsql"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_covid_src_dimcalendar_asql",
+						"type": "DatasetReference"
+					},
+					"name": "SrcDimDate"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_covid_src_dimstate_asql",
+						"type": "DatasetReference"
+					},
+					"name": "SrcDimState"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ds_covid_dest_factcoviddata_stg",
+						"type": "DatasetReference"
+					},
+					"name": "SnkFactcoviddataStg"
+				}
+			],
+			"transformations": [
+				{
+					"name": "DerConformedCasesAndDeath"
+				},
+				{
+					"name": "SelStgColumns"
+				},
+				{
+					"name": "JoinDimCalendar"
+				},
+				{
+					"name": "SelRequiredColumns"
+				},
+				{
+					"name": "DerReplaceNullWithDefault"
+				},
+				{
+					"name": "Join1"
+				}
+			],
+			"script": "source(output(\n\t\tsubmission_date as string,\n\t\tstate as string,\n\t\ttot_cases as string,\n\t\tconf_cases as string,\n\t\tprob_cases as string,\n\t\tnew_case as string,\n\t\tpnew_case as string,\n\t\ttot_death as string,\n\t\tconf_death as string,\n\t\tprob_death as string,\n\t\tnew_death as string,\n\t\tpnew_death as string,\n\t\tcreated_at as string,\n\t\tconsent_cases as string,\n\t\tconsent_deaths as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> SrcRawCoviDataAsql\nsource(output(\n\t\tDateKey as integer,\n\t\tDate as date,\n\t\tDayDate as integer,\n\t\tDayOfWeekName as string,\n\t\tWeekNumber as integer,\n\t\tMonthNumber as integer,\n\t\tMonthName as string,\n\t\tMonthShortName as string,\n\t\tYear as integer,\n\t\tQuarterNumber as string,\n\t\tQuarterName as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tquery: 'SELECT * FROM DimCalendar WHERE [Date] >= (SELECT ISNULL(MIN(submission_date),\\'2020-01-01\\') FROM RawCovidData) \\nAND [Date] <= (SELECT ISNULL(MAX(submission_date),\\'2020-12-31\\') FROM RawCovidData)',\n\tformat: 'query') ~> SrcDimDate\nsource(output(\n\t\tStateKey as integer,\n\t\tStateCode as string,\n\t\tStateName as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> SrcDimState\nSrcRawCoviDataAsql derive(DateId = toDate(submission_date, 'MM/dd/yyyy'),\n\t\tConformedNewCases = toInteger(new_case) - toInteger(pnew_case),\n\t\tConformedNewDeath = toInteger(new_death) - toInteger(pnew_death),\n\t\tProbableNewCases = toInteger(pnew_case),\n\t\tProbableNewDeath = toInteger(pnew_death)) ~> DerConformedCasesAndDeath\nDerConformedCasesAndDeath select(mapColumn(\n\t\tDateId,\n\t\tStateCode = state,\n\t\tConformedNewCases,\n\t\tProbableNewCases,\n\t\tConformedNewDeath,\n\t\tProbableNewDeath\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> SelStgColumns\nJoin1, SelStgColumns join(Date == DateId\n\t&& SrcDimState@StateCode == SelStgColumns@StateCode,\n\tjoinType:'left',\n\tbroadcast: 'auto')~> JoinDimCalendar\nDerReplaceNullWithDefault select(mapColumn(\n\t\tDateId = DateKey,\n\t\tStateCode = StateKey,\n\t\tConformedNewCases = DerConformedNewCases,\n\t\tProbableNewCases = DerProbableNewCases,\n\t\tConformedNewDeath = DerConformedNewDeath,\n\t\tProbableNewDeath = DerProbableNewDeath\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> SelRequiredColumns\nJoinDimCalendar derive(DerConformedNewCases = iifNull(ConformedNewCases, 0),\n\t\tDerProbableNewCases = iifNull(ProbableNewCases, 0),\n\t\tDerConformedNewDeath = iifNull(ConformedNewDeath, 0),\n\t\tDerProbableNewDeath = iifNull(ProbableNewDeath, 0)) ~> DerReplaceNullWithDefault\nSrcDimDate, SrcDimState join(1==1,\n\tjoinType:'cross',\n\tbroadcast: 'auto')~> Join1\nSelRequiredColumns sink(input(\n\t\tCovidDataKey as integer,\n\t\tStateCode as integer,\n\t\tConformedNewCases as integer,\n\t\tProbableNewCases as integer,\n\t\tConformedNewDeath as integer,\n\t\tProbableNewDeath as integer,\n\t\tdateid as integer\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\tformat: 'table',\n\tmapColumn(\n\t\tStateCode,\n\t\tConformedNewCases,\n\t\tProbableNewCases,\n\t\tConformedNewDeath,\n\t\tProbableNewDeath,\n\t\tdateid = DateId\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\terrorHandlingOption: 'stopOnFirstError') ~> SnkFactcoviddataStg"
+		}
+	}
+}

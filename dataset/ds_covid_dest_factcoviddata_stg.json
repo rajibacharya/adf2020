@@ -1,0 +1,52 @@
+{
+	"name": "ds_covid_dest_factcoviddata_stg",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_azuresql",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "CovidDataKey",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "StateCode",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "ConformedNewCases",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "ProbableNewCases",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "ConformedNewDeath",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "ProbableNewDeath",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "dateid",
+				"type": "int",
+				"precision": 10
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "StgCovidDate"
+		}
+	}
+}
