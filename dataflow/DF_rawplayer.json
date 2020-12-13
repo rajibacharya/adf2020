@@ -1,0 +1,53 @@
+{
+	"name": "DF_rawplayer",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "rawplayerDS",
+						"type": "DatasetReference"
+					},
+					"name": "sourceforPlayer"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "stageplayerDS",
+						"type": "DatasetReference"
+					},
+					"name": "sinkstagePlayer"
+				}
+			],
+			"transformations": [
+				{
+					"name": "Select1"
+				},
+				{
+					"name": "Unpivot1"
+				},
+				{
+					"name": "Select2"
+				},
+				{
+					"name": "duplicatecheck"
+				},
+				{
+					"name": "DerivedColumn1"
+				},
+				{
+					"name": "Filter1"
+				},
+				{
+					"name": "Select3"
+				},
+				{
+					"name": "DerivedColumn2"
+				}
+			],
+			"script": "source(output(\n\t\tid as integer,\n\t\tinning as string,\n\t\tover as string,\n\t\tball as string,\n\t\tbatsman as string,\n\t\tnon_striker as string,\n\t\tbowler as string,\n\t\tbatsman_runs as string,\n\t\textra_runs as string,\n\t\ttotal_runs as string,\n\t\tnon_boundary as boolean,\n\t\tis_wicket as boolean,\n\t\tdismissal_kind as string,\n\t\tplayer_dismissed as string,\n\t\tfielder as string,\n\t\textras_type as string,\n\t\tbatting_team as string,\n\t\tbowling_team as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> sourceforPlayer\nsourceforPlayer select(mapColumn(\n\t\tbatsman,\n\t\tnon_striker,\n\t\tbowler,\n\t\tfielder,\n\t\tid\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> Select1\nSelect3 unpivot(output(\n\t\tColName as string,\n\t\tname as string\n\t),\n\tungroupBy(id),\n\tlateral: true,\n\tignoreNullPivots: true) ~> Unpivot1\nDerivedColumn2 select(mapColumn(\n\t\tname,\n\t\tPlayerName,\n\t\tJerseyNumber,\n\t\tDateofBirth,\n\t\tStyle,\n\t\tOversease,\n\t\tTeam,\n\t\tPrice\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> Select2\nFilter1 aggregate(groupBy(name),\n\tPlayerName = first(name)) ~> duplicatecheck\nSelect1 derive(fielder1 = split(fielder,',')[1],\n\t\tfielder2 = iifNull(split(fielder,',')[2],'NA')) ~> DerivedColumn1\nUnpivot1 filter(name !='NA') ~> Filter1\nDerivedColumn1 select(mapColumn(\n\t\tbatsman,\n\t\tnon_striker,\n\t\tbowler,\n\t\tfielder1,\n\t\tfielder2,\n\t\tid\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> Select3\nduplicatecheck derive(JerseyNumber = toInteger(100),\n\t\tDateofBirth = currentDate('yyyy-MM-dd'),\n\t\tStyle = toString('Batsman'),\n\t\tOversease = true(),\n\t\tTeam = toString('IndianTeam'),\n\t\tPrice = toFloat(500000)) ~> DerivedColumn2\nSelect2 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['stageDimPlayerSource.csv'],\n\tmapColumn(\n\t\tname,\n\t\tPlayerName,\n\t\tJerseyNumber,\n\t\tDateofBirth,\n\t\tStyle,\n\t\tOversease,\n\t\tTeam,\n\t\tPrice\n\t),\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> sinkstagePlayer"
+		}
+	}
+}

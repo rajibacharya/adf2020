@@ -1,0 +1,98 @@
+{
+	"name": "rawplayerDS",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "lpladlsgen2LS",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "ipl_ball_by_ball.csv",
+				"folderPath": "raw",
+				"fileSystem": "lpl"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "id",
+				"type": "String"
+			},
+			{
+				"name": "inning",
+				"type": "String"
+			},
+			{
+				"name": "over",
+				"type": "String"
+			},
+			{
+				"name": "ball",
+				"type": "String"
+			},
+			{
+				"name": "batsman",
+				"type": "String"
+			},
+			{
+				"name": "non_striker",
+				"type": "String"
+			},
+			{
+				"name": "bowler",
+				"type": "String"
+			},
+			{
+				"name": "batsman_runs",
+				"type": "String"
+			},
+			{
+				"name": "extra_runs",
+				"type": "String"
+			},
+			{
+				"name": "total_runs",
+				"type": "String"
+			},
+			{
+				"name": "non_boundary",
+				"type": "String"
+			},
+			{
+				"name": "is_wicket",
+				"type": "String"
+			},
+			{
+				"name": "dismissal_kind",
+				"type": "String"
+			},
+			{
+				"name": "player_dismissed",
+				"type": "String"
+			},
+			{
+				"name": "fielder",
+				"type": "String"
+			},
+			{
+				"name": "extras_type",
+				"type": "String"
+			},
+			{
+				"name": "batting_team",
+				"type": "String"
+			},
+			{
+				"name": "bowling_team",
+				"type": "String"
+			}
+		]
+	},
+	"type": "Microsoft.Synapse/workspaces/datasets"
+}

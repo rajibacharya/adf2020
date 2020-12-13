@@ -1,0 +1,76 @@
+{
+	"name": "DF_stageplayer",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "dimstagePlayerDS",
+						"type": "DatasetReference"
+					},
+					"name": "sourcedimPlayer"
+				},
+				{
+					"dataset": {
+						"referenceName": "dimprodPlayerDS",
+						"type": "DatasetReference"
+					},
+					"name": "prodDimPlayer"
+				},
+				{
+					"dataset": {
+						"referenceName": "dimprodPlayerDS",
+						"type": "DatasetReference"
+					},
+					"name": "MAXKEY"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "dimprodPlayerDS",
+						"type": "DatasetReference"
+					},
+					"name": "sinkDimProdPlayer"
+				}
+			],
+			"transformations": [
+				{
+					"name": "Lookup1"
+				},
+				{
+					"name": "Select1"
+				},
+				{
+					"name": "SurrogateKey1"
+				},
+				{
+					"name": "ConditionalSplit1"
+				},
+				{
+					"name": "DerivedColumn1"
+				},
+				{
+					"name": "Select2"
+				},
+				{
+					"name": "AlterRow1"
+				},
+				{
+					"name": "Aggregate1"
+				},
+				{
+					"name": "Join1"
+				},
+				{
+					"name": "DerivedColumn2"
+				},
+				{
+					"name": "Select3"
+				}
+			],
+			"script": "source(output(\n\t\tName as string,\n\t\tJerseyNumber as string,\n\t\tDateofBirth as string,\n\t\tStyle as string,\n\t\tOversease as string,\n\t\tTeam as string,\n\t\tPrice as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> sourcedimPlayer\nsource(output(\n\t\tPlayerKey as integer,\n\t\tName as string,\n\t\tJerseyNumber as string,\n\t\tDateofBirth as string,\n\t\tStyle as string,\n\t\tOversease as string,\n\t\tTeam as string,\n\t\tPrice as string,\n\t\tIsActive as string,\n\t\tStartDate as string,\n\t\tEndDate as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> prodDimPlayer\nsource(output(\n\t\tPlayerKey as integer,\n\t\tName as string,\n\t\tJerseyNumber as string,\n\t\tDateofBirth as string,\n\t\tStyle as string,\n\t\tOversease as string,\n\t\tTeam as string,\n\t\tPrice as string,\n\t\tIsActive as string,\n\t\tStartDate as string,\n\t\tEndDate as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> MAXKEY\nsourcedimPlayer, prodDimPlayer lookup(sourcedimPlayer@Name == prodDimPlayer@Name,\n\tmultiple: false,\n\tpickup: 'any',\n\tbroadcast: 'auto')~> Lookup1\nJoin1 select(mapColumn(\n\t\tName,\n\t\tJerseyNumber,\n\t\tDateofBirth,\n\t\tStyle,\n\t\tOversease,\n\t\tTeam,\n\t\tPrice,\n\t\tlkp_Name,\n\t\tlkp_JerseyNumber,\n\t\tlkp_DateofBirth,\n\t\tlkp_Style,\n\t\tlkp_Oversease,\n\t\tlkp_Team,\n\t\tlkp_Price,\n\t\tlkp_IsActive,\n\t\tlkp_StartDate,\n\t\tlkp_EndDate,\n\t\tMaxKey,\n\t\tlkp_PlayerKey\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> Select1\nSelect1 keyGenerate(output(SK01 as long),\n\tstartAt: 1L) ~> SurrogateKey1\nSurrogateKey1 split(isNull(lkp_PlayerKey),\n\tdisjoint: false) ~> ConditionalSplit1@(new, update)\nConditionalSplit1@new derive(StartDate = currentDate('yyyy-MM-dd'),\n\t\tEndDate = toTimestamp('9999-12-31','yyyy-MM-dd'),\n\t\tPlayerKey = (SK01+MaxKey),\n\t\tIsActive = 1) ~> DerivedColumn1\nDerivedColumn1 select(mapColumn(\n\t\tName,\n\t\tJerseyNumber,\n\t\tDateofBirth,\n\t\tStyle,\n\t\tOversease,\n\t\tTeam,\n\t\tPrice,\n\t\tStartDate,\n\t\tEndDate,\n\t\tPlayerkey = PlayerKey,\n\t\tIsActive\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> Select2\nSelect2 alterRow(insertIf(true())) ~> AlterRow1\nMAXKEY aggregate(max_key = max((PlayerKey))) ~> Aggregate1\nSelect3, DerivedColumn2 join(1==1,\n\tjoinType:'cross',\n\tbroadcast: 'auto')~> Join1\nAggregate1 derive(MaxKey = iifNull((max_key), 0)) ~> DerivedColumn2\nLookup1 select(mapColumn(\n\t\tName = sourcedimPlayer@Name,\n\t\tJerseyNumber = sourcedimPlayer@JerseyNumber,\n\t\tDateofBirth = sourcedimPlayer@DateofBirth,\n\t\tStyle = sourcedimPlayer@Style,\n\t\tOversease = sourcedimPlayer@Oversease,\n\t\tTeam = sourcedimPlayer@Team,\n\t\tPrice = sourcedimPlayer@Price,\n\t\tlkp_Name = prodDimPlayer@Name,\n\t\tlkp_JerseyNumber = prodDimPlayer@JerseyNumber,\n\t\tlkp_DateofBirth = prodDimPlayer@DateofBirth,\n\t\tlkp_Style = prodDimPlayer@Style,\n\t\tlkp_Oversease = prodDimPlayer@Oversease,\n\t\tlkp_Team = prodDimPlayer@Team,\n\t\tlkp_Price = prodDimPlayer@Price,\n\t\tlkp_IsActive = IsActive,\n\t\tlkp_StartDate = StartDate,\n\t\tlkp_EndDate = EndDate,\n\t\tlkp_PlayerKey = PlayerKey\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> Select3\nAlterRow1 sink(input(\n\t\tPlayerKey as string,\n\t\tName as string,\n\t\tJerseyNumber as string,\n\t\tDateofBirth as string,\n\t\tStyle as string,\n\t\tOversease as string,\n\t\tTeam as string,\n\t\tPrice as string,\n\t\tIsActive as string,\n\t\tStartDate as string,\n\t\tEndDate as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: true,\n\tpartitionFileNames:['prodDimPlayer.csv'],\n\tmapColumn(\n\t\tPlayerKey = Playerkey,\n\t\tName,\n\t\tJerseyNumber,\n\t\tDateofBirth,\n\t\tStyle,\n\t\tOversease,\n\t\tTeam,\n\t\tPrice,\n\t\tIsActive,\n\t\tStartDate,\n\t\tEndDate\n\t),\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> sinkDimProdPlayer"
+		}
+	}
+}
