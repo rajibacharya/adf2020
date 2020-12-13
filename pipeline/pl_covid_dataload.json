@@ -237,7 +237,7 @@
 				]
 			},
 			{
-				"name": "dataflow1",
+				"name": "df_covid_dataload",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [
 					{
